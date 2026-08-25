@@ -1,5 +1,6 @@
 import type { CorsOptions } from "cors";
 
+import { AppError } from "../common/http/app-error";
 import { env, securityConfig } from "./env";
 
 export const corsOptions: CorsOptions = {
@@ -22,7 +23,7 @@ export const corsOptions: CorsOptions = {
       return;
     }
 
-    callback(new Error("Origin not allowed by CORS"));
+    callback(new AppError(403, "Origin is not allowed by CORS policy"));
   },
   credentials: false,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

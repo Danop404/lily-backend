@@ -52,6 +52,7 @@ The server runs on `http://localhost:4000` by default.
 - `GET /api/v1/health`
 - `GET /api/v1/agents`
 - `POST /api/v1/agents`
+- `POST /api/v1/payments/quote`
 
 ## Example API
 
@@ -75,6 +76,19 @@ curl -X POST http://localhost:4000/api/v1/agents \
   }'
 ```
 
+Quote requests use `assetCode` for Stellar assets. Use `"XLM"` when quoting the native Stellar asset.
+
+```bash
+curl -X POST http://localhost:4000/api/v1/payments/quote \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fromWalletId": "wallet_123",
+    "toAddress": "GAAQEAYEAUDAOCAJBIFQYDIOB4IBCEQTCQKRMFYYDENBWHA5DYPSABOV",
+    "amount": "25.5000000",
+    "assetCode": "XLM"
+  }'
+```
+
 ## Scripts
 
 ```bash
@@ -95,6 +109,7 @@ src/
   modules/
     agents/
     health/
+    payments/
   routes/
   app.ts
   server.ts

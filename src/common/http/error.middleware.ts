@@ -4,6 +4,51 @@ import { env } from "../../config/env";
 import { logger } from "../../config/logger";
 import { AppError } from "./app-error";
 
+type HttpLikeError = Error & {
+  status?: number;
+  statusCode?: number;
+  type?: string;
+};
+
+const isHttpStatusCode = (value: unknown): value is number =>
+  Number.isInteger(value) && Number(value) >= 400 && Number(value) <= 599;
+
+const getStatusCode = (error: Error): number => {
+  if (error instanceof AppError) {
+    return error.statusCode;
+  }
+
+  const httpError = error as HttpLikeError;
+
+  if (isHttpStatusCode(httpError.statusCode)) {
+    return httpError.statusCode;
+  }
+
+  if (isHttpStatusCode(httpError.status)) {
+    return httpError.status;
+  }
+
+  return 500;
+};
+
+const getMessage = (error: Error, statusCode: number): string => {
+  const httpError = error as HttpLikeError;
+
+  if (httpError.type === "entity.parse.failed") {
+    return "Malformed JSON request body";
+  }
+
+  if (httpError.type === "entity.too.large") {
+    return "Request body too large";
+  }
+
+  if (statusCode === 500 && env.NODE_ENV === "production") {
+    return "Internal server error";
+  }
+
+  return error.message;
+};
+
 export const errorHandler = (
   error: Error,
   request: Request,
@@ -12,8 +57,9 @@ export const errorHandler = (
 ): void => {
   void _next;
 
-  const statusCode = error instanceof AppError ? error.statusCode : 500;
+  const statusCode = getStatusCode(error);
   const details = error instanceof AppError ? error.details : undefined;
+  const message = getMessage(error, statusCode);
 
   logger.error(
     {
@@ -27,10 +73,7 @@ export const errorHandler = (
 
   response.status(statusCode).json({
     success: false,
-    message:
-      statusCode === 500 && env.NODE_ENV === "production"
-        ? "Internal server error"
-        : error.message,
+    message,
     ...(details ? { details } : {}),
   });
 };

@@ -14,6 +14,20 @@ describe("health endpoints", () => {
     expect(response.body.data.status).toBe("ok");
   });
 
+  it("disables caching for API responses", async () => {
+    const response = await request(app).get("/api/v1/health");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["cache-control"]).toBe("no-store");
+  });
+
+  it("leaves the root route outside the API no-store policy", async () => {
+    const response = await request(app).get("/");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["cache-control"]).toBeUndefined();
+  });
+
   it("returns a typed 404 payload for missing routes", async () => {
     const response = await request(app).get("/missing");
 

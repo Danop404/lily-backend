@@ -12,6 +12,11 @@ import { logger } from "./config/logger";
 import { apiRateLimiter } from "./config/rate-limit";
 import { apiRouter } from "./routes";
 
+const noStoreApiCache: express.RequestHandler = (_request, response, next) => {
+  response.set("Cache-Control", "no-store");
+  next();
+};
+
 export const createApp = () => {
   const app = express();
 
@@ -52,7 +57,7 @@ export const createApp = () => {
     });
   });
 
-  app.use(env.API_PREFIX, apiRouter);
+  app.use(env.API_PREFIX, noStoreApiCache, apiRouter);
   app.use(notFoundHandler);
   app.use(errorHandler);
 

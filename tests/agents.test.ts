@@ -26,12 +26,14 @@ describe("agent endpoints", () => {
   });
 
   it("creates an agent with validated input", async () => {
-    const response = await request(app).post("/api/v1/agents").send({
-      name: "Liquidity Bot",
-      description:
-        "AgentLily responsible for orchestrating liquidity and payment workflows.",
-      capabilities: ["liquidity-management", "payments"],
-    });
+    const response = await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Liquidity Bot",
+        description:
+          "AgentLily responsible for orchestrating liquidity and payment workflows.",
+        capabilities: ["liquidity-management", "payments"],
+      });
 
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
@@ -47,12 +49,14 @@ describe("agent endpoints", () => {
   });
 
   it("persists a created agent in the list endpoint", async () => {
-    await request(app).post("/api/v1/agents").send({
-      name: "Marketplace Runner",
-      description:
-        "AgentLily responsible for purchasing tools and settling marketplace invoices.",
-      capabilities: ["marketplace-purchases", "settlement"],
-    });
+    await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Marketplace Runner",
+        description:
+          "AgentLily responsible for purchasing tools and settling marketplace invoices.",
+        capabilities: ["marketplace-purchases", "settlement"],
+      });
 
     const response = await request(app).get("/api/v1/agents");
 
@@ -61,6 +65,32 @@ describe("agent endpoints", () => {
     expect(response.body.data.agents[1]).toMatchObject({
       id: "agentlily_2",
       name: "Marketplace Runner",
+    });
+  });
+
+  it("returns defensive copies when listing agents", () => {
+    const firstList = agentsService.listAgents();
+
+    firstList.agents[0]!.name = "Mutated Treasury Agent";
+    firstList.agents[0]!.capabilities.push("store-corruption");
+    firstList.agents.push({
+      id: "agentlily_mutated",
+      name: "Injected Agent",
+      description: "This response mutation must not alter the agent store.",
+      walletAddress: "GINJECTED0000000000000000000000000000000000000000000000",
+      status: "active",
+      capabilities: ["injected"],
+      createdAt: new Date("2026-05-17T00:00:00.000Z").toISOString(),
+    });
+
+    const secondList = agentsService.listAgents();
+
+    expect(secondList.total).toBe(1);
+    expect(secondList.agents).toHaveLength(1);
+    expect(secondList.agents[0]).toMatchObject({
+      id: "agentlily_demo_001",
+      name: "Treasury Settlement Agent",
+      capabilities: ["wallet-provisioning", "usdc-payments", "settlement"],
     });
   });
 

@@ -20,6 +20,11 @@ const seedAgents = (): Agent[] => [
 
 const agentsStore: Agent[] = seedAgents();
 
+const copyAgent = (agent: Agent): Agent => ({
+  ...agent,
+  capabilities: [...agent.capabilities],
+});
+
 const createWalletAddress = (seed: string): string => {
   const normalizedSeed = seed.replace(/[^a-z0-9]/gi, "").toUpperCase();
   return `G${normalizedSeed.padEnd(55, "0").slice(0, 55)}`;
@@ -28,7 +33,7 @@ const createWalletAddress = (seed: string): string => {
 export const agentsService = {
   listAgents(): ListAgentsResponse {
     return {
-      agents: agentsStore,
+      agents: agentsStore.map(copyAgent),
       total: agentsStore.length,
     };
   },

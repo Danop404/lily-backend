@@ -75,6 +75,9 @@ curl -X POST http://localhost:4000/api/v1/agents \
   }'
 ```
 
+`POST /api/v1/agents` accepts only `name`, `description`, and `capabilities`.
+Unknown payload keys are rejected with validation field errors.
+
 ## Scripts
 
 ```bash

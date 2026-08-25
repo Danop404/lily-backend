@@ -26,12 +26,14 @@ describe("agent endpoints", () => {
   });
 
   it("creates an agent with validated input", async () => {
-    const response = await request(app).post("/api/v1/agents").send({
-      name: "Liquidity Bot",
-      description:
-        "AgentLily responsible for orchestrating liquidity and payment workflows.",
-      capabilities: ["liquidity-management", "payments"],
-    });
+    const response = await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Liquidity Bot",
+        description:
+          "AgentLily responsible for orchestrating liquidity and payment workflows.",
+        capabilities: ["liquidity-management", "payments"],
+      });
 
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
@@ -47,12 +49,14 @@ describe("agent endpoints", () => {
   });
 
   it("persists a created agent in the list endpoint", async () => {
-    await request(app).post("/api/v1/agents").send({
-      name: "Marketplace Runner",
-      description:
-        "AgentLily responsible for purchasing tools and settling marketplace invoices.",
-      capabilities: ["marketplace-purchases", "settlement"],
-    });
+    await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Marketplace Runner",
+        description:
+          "AgentLily responsible for purchasing tools and settling marketplace invoices.",
+        capabilities: ["marketplace-purchases", "settlement"],
+      });
 
     const response = await request(app).get("/api/v1/agents");
 
@@ -61,6 +65,25 @@ describe("agent endpoints", () => {
     expect(response.body.data.agents[1]).toMatchObject({
       id: "agentlily_2",
       name: "Marketplace Runner",
+    });
+  });
+
+  it("rejects unknown keys in agent creation payloads", async () => {
+    const response = await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Treasury Bot",
+        description:
+          "AgentLily responsible for treasury management and payment routing.",
+        capabilities: ["treasury-management"],
+        admin: true,
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe("Request validation failed");
+    expect(response.body.details.fieldErrors).toMatchObject({
+      admin: [expect.stringContaining("Unrecognized key")],
     });
   });
 

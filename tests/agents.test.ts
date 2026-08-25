@@ -26,12 +26,14 @@ describe("agent endpoints", () => {
   });
 
   it("creates an agent with validated input", async () => {
-    const response = await request(app).post("/api/v1/agents").send({
-      name: "Liquidity Bot",
-      description:
-        "AgentLily responsible for orchestrating liquidity and payment workflows.",
-      capabilities: ["liquidity-management", "payments"],
-    });
+    const response = await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Liquidity Bot",
+        description:
+          "AgentLily responsible for orchestrating liquidity and payment workflows.",
+        capabilities: ["liquidity-management", "payments"],
+      });
 
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
@@ -47,12 +49,14 @@ describe("agent endpoints", () => {
   });
 
   it("persists a created agent in the list endpoint", async () => {
-    await request(app).post("/api/v1/agents").send({
-      name: "Marketplace Runner",
-      description:
-        "AgentLily responsible for purchasing tools and settling marketplace invoices.",
-      capabilities: ["marketplace-purchases", "settlement"],
-    });
+    await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Marketplace Runner",
+        description:
+          "AgentLily responsible for purchasing tools and settling marketplace invoices.",
+        capabilities: ["marketplace-purchases", "settlement"],
+      });
 
     const response = await request(app).get("/api/v1/agents");
 
@@ -61,6 +65,50 @@ describe("agent endpoints", () => {
     expect(response.body.data.agents[1]).toMatchObject({
       id: "agentlily_2",
       name: "Marketplace Runner",
+    });
+  });
+
+  it("trims agent name and description before storing them", async () => {
+    const response = await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "  Liquidity Bot  ",
+        description:
+          "  AgentLily responsible for orchestrating liquidity workflows.  ",
+        capabilities: ["liquidity-management", "payments"],
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.data.agent).toMatchObject({
+      name: "Liquidity Bot",
+      description:
+        "AgentLily responsible for orchestrating liquidity workflows.",
+    });
+    expect(response.body.data.agent.walletAddress).toMatch(/^GLIQUIDITYBOT0+/);
+
+    const listResponse = await request(app).get("/api/v1/agents");
+
+    expect(listResponse.body.data.agents[1]).toMatchObject({
+      name: "Liquidity Bot",
+      description:
+        "AgentLily responsible for orchestrating liquidity workflows.",
+    });
+  });
+
+  it("rejects whitespace-only agent name and description values", async () => {
+    const response = await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "  ",
+        description: "          ",
+        capabilities: ["payments"],
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.details.fieldErrors).toMatchObject({
+      name: [expect.any(String)],
+      description: [expect.any(String)],
     });
   });
 

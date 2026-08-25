@@ -82,6 +82,8 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run typecheck
+npm run audit:prod
 npm run format
 npm run test
 ```
@@ -114,9 +116,16 @@ Every contribution is expected to pass:
 
 ```bash
 npm run lint
+npm run typecheck
+npm run audit:prod
 npm run build
 npm run test
 ```
+
+`npm run audit:prod` fails CI on high or critical production dependency
+vulnerabilities. Triage audit failures by upgrading the affected package,
+pinning a patched transitive dependency, or documenting why the finding does not
+apply before relaxing the policy.
 
 ## Contributing
 

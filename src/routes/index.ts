@@ -8,3 +8,4 @@ export const apiRouter = Router();
 apiRouter.use("/health", healthRouter);
 apiRouter.use("/metrics", metricsRouter);
 apiRouter.use("/agents", agentsRouter);
+apiRouter.use("/payments", paymentsRouter);

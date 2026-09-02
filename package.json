@@ -9,6 +9,8 @@
     "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "node dist/server.js",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",

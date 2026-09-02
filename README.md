@@ -86,6 +86,8 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run typecheck
+npm run audit:prod
 npm run format
 npm run test
 npm run test:coverage
@@ -119,6 +121,8 @@ Every contribution is expected to pass:
 
 ```bash
 npm run lint
+npm run typecheck
+npm run audit:prod
 npm run build
 npm run test:coverage
 ```

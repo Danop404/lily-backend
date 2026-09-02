@@ -7,5 +7,6 @@ import { createAgentSchema, agentStatusSchema } from "./agents.schema";
 export const agentsRouter = Router();
 
 agentsRouter.get("/", listAgents);
+agentsRouter.get("/:id", getAgent);
 agentsRouter.post("/", validateBody(createAgentSchema), createAgent);
 agentsRouter.patch("/:id", validateBody(agentStatusSchema), updateAgentStatus);

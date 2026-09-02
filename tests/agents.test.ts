@@ -39,7 +39,7 @@ describe("agent endpoints", () => {
       name: "Liquidity Bot",
       description:
         "AgentLily responsible for orchestrating liquidity and payment workflows.",
-      capabilities: ["liquidity-management", "payments"],
+      capabilities: ["usdc-payments", "payments"],
     });
 
     expect(response.status).toBe(201);
@@ -50,7 +50,7 @@ describe("agent endpoints", () => {
       description:
         "AgentLily responsible for orchestrating liquidity and payment workflows.",
       status: "active",
-      capabilities: ["liquidity-management", "payments"],
+      capabilities: ["usdc-payments", "payments"],
     });
     expect(response.body.data.agent.walletAddress).toMatch(/^GLIQUIDITYBOT0+/);
   });
@@ -60,7 +60,7 @@ describe("agent endpoints", () => {
       name: "Marketplace Runner",
       description:
         "AgentLily responsible for purchasing tools and settling marketplace invoices.",
-      capabilities: ["marketplace-purchases", "settlement"],
+      capabilities: ["settlement", "settlement"],
     });
 
     const response = await request(app).get("/api/v1/agents");

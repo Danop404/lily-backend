@@ -71,8 +71,4 @@ export const agentsService = {
 
     return { agent };
   },
-
-  reset(): void {
-    agentsStore.splice(0, agentsStore.length, ...seedAgents());
-  },
 };

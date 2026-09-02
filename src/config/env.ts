@@ -80,4 +80,6 @@ export const securityConfig = {
   rateLimitWindowMs: env.RATE_LIMIT_WINDOW_MS,
   rateLimitMaxRequests: env.RATE_LIMIT_MAX_REQUESTS,
   trustProxy: env.TRUST_PROXY,
+  authApiKey: env.AUTH_API_KEY,
+  authApiKeyHeader: env.AUTH_API_KEY_HEADER,
 };

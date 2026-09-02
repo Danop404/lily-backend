@@ -21,6 +21,10 @@ This repository is the backend foundation for provisioning agent-facing services
 - Automated lint, build, and test checks in GitHub Actions
 - Docker-ready local and deployment workflow
 
+## Docker
+
+The production Docker image runs as the `node` user (non-root) for security. The `Dockerfile` uses the `--chown=node:node` flag on `COPY` instructions so the `node` user owns all application files. No additional configuration is needed.
+
 ## Tech Stack
 
 - Node.js 22
@@ -86,6 +90,7 @@ npm run typecheck
 npm run audit:prod
 npm run format
 npm run test
+npm run test:coverage
 ```
 
 ## Project Structure
@@ -119,14 +124,28 @@ npm run lint
 npm run typecheck
 npm run audit:prod
 npm run build
-npm run test
+npm run test:coverage
 ```
 
-`npm run audit:prod` fails CI on high or critical production dependency
-vulnerabilities. Triage audit failures by upgrading the affected package,
-pinning a patched transitive dependency, or documenting why the finding does not
-apply before relaxing the policy.
 
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines and local setup details.
+
+## API Versioning Strategy
+
+This backend uses **URL path versioning** as its primary API versioning mechanism.
+
+- All endpoints are mounted under `/api/v1/` (configurable via `API_PREFIX` env var)
+- When breaking changes are required, a new version module (`v2`) will be created and mounted alongside `v1`
+- The existing `v1` routes will continue to serve existing clients without modification
+- New major versions are introduced only for breaking changes; additive changes land in the current version
+- Deprecation of old versions follows a minimum 6-month notice period documented in release notes
+
+### Adding a New API Version
+
+1. Create `src/routes/v2/index.ts` with the new router
+2. Mount it in `src/app.ts`: `app.use("/api/v2", apiV2Router)`
+3. Keep `v1` routes unchanged for backward compatibility
+4. Document migration guide in `docs/migration/v1-to-v2.md`
+5. Announce deprecation timeline in CHANGELOG

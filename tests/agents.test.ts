@@ -73,6 +73,25 @@ describe("agent endpoints", () => {
     });
   });
 
+  it("rejects unknown keys in agent creation payloads", async () => {
+    const response = await request(app)
+      .post("/api/v1/agents")
+      .send({
+        name: "Treasury Bot",
+        description:
+          "AgentLily responsible for treasury management and payment routing.",
+        capabilities: ["treasury-management"],
+        admin: true,
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe("Request validation failed");
+    expect(response.body.details.fieldErrors).toMatchObject({
+      admin: [expect.stringContaining("Unrecognized key")],
+    });
+  });
+
   it("rejects invalid agent payloads with typed validation errors", async () => {
     const response = await request(app).post("/api/v1/agents").send({
       name: "A",

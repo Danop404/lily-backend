@@ -1,7 +1,31 @@
 import type { NextFunction, Request, RequestHandler, Response } from "express";
-import type { ZodTypeAny } from "zod";
+import type { ZodError, ZodTypeAny } from "zod";
 
 import { AppError } from "@/common/http/app-error";
+
+interface ValidationErrorDetails {
+  formErrors: string[];
+  fieldErrors: Record<string, string[] | undefined>;
+}
+
+const flattenValidationError = (error: ZodError) => {
+  const flattened = error.flatten() as ValidationErrorDetails;
+
+  for (const issue of error.issues) {
+    if (issue.code !== "unrecognized_keys") {
+      continue;
+    }
+
+    for (const key of issue.keys) {
+      flattened.fieldErrors[key] = [
+        ...(flattened.fieldErrors[key] ?? []),
+        `Unrecognized key: "${key}"`,
+      ];
+    }
+  }
+
+  return flattened;
+};
 
 export const validateBody = <TSchema extends ZodTypeAny>(
   schema: TSchema,

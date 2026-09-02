@@ -8,6 +8,7 @@ export interface Agent {
   status: AgentStatus;
   capabilities: string[];
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateAgentInput {
@@ -22,5 +23,9 @@ export interface ListAgentsResponse {
 }
 
 export interface CreateAgentResponse {
+  agent: Agent;
+}
+
+export interface UpdateAgentStatusResponse {
   agent: Agent;
 }

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { methodNotAllowedHandler } from "../../common/http/method-not-allowed.middleware";
 
+import { idempotencyMiddleware } from "../../common/http/idempotency.middleware";
 import { validateBody } from "../../common/http/validate.middleware";
 import { createAgent, listAgents, updateAgentStatus } from "./agents.controller";
 import { createAgentSchema, agentStatusSchema } from "./agents.schema";

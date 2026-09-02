@@ -19,6 +19,12 @@ export const createAgentSchema = z.object({
     .transform((caps) => [...new Set(caps)]),
 });
 
+export const patchAgentSchema = z.object({
+  status: z.enum(["active", "paused"]).optional(),
+}).refine((data) => data.status !== undefined, {
+  message: "At least one field must be provided",
+});
+
 export type CreateAgentSchema = z.infer<typeof createAgentSchema>;
 
 export const agentStatusSchema = z.object({

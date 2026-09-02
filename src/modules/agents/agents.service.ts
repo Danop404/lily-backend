@@ -1,6 +1,7 @@
 import { AppError } from "../../common/http/app-error";
 import type {
   Agent,
+  AgentStatus,
   CreateAgentInput,
   CreateAgentResponse,
   ListAgentsResponse,

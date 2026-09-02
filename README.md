@@ -21,6 +21,10 @@ This repository is the backend foundation for provisioning agent-facing services
 - Automated lint, build, and test checks in GitHub Actions
 - Docker-ready local and deployment workflow
 
+## Docker
+
+The production Docker image runs as the `node` user (non-root) for security. The `Dockerfile` uses the `--chown=node:node` flag on `COPY` instructions so the `node` user owns all application files. No additional configuration is needed.
+
 ## Tech Stack
 
 - Node.js 22

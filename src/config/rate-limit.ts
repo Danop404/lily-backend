@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
+import type { Request, Response } from "express";
 
 import { securityConfig } from "./env";
 

@@ -21,7 +21,9 @@ export const errorHandler = (
   const details = error instanceof AppError ? error.details : undefined;
   const isAppError = error instanceof AppError;
 
-  logger.error(
+  const logLevel = statusCode >= 400 && statusCode < 500 ? "warn" : "error";
+
+  logger[logLevel](
     {
       err: error,
       method: request.method,

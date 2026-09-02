@@ -46,6 +46,7 @@ app.use(
 import { apiRateLimiter } from "./config/rate-limit";
 import { shouldIgnoreRequestLog } from "./config/request-logging";
 import { apiRouter } from "./routes";
+import { serializeRequest } from "./common/http/request-logger";
 
 export const createApp = (): Express => {
   const app = express();

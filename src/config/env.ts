@@ -3,6 +3,25 @@ import { z } from "zod";
 
 dotenv.config();
 
+const trustProxySchema = z.preprocess(
+  (val) => (val === undefined || val === "" ? "false" : val),
+  z.union([
+    z.literal("false").transform(() => false as const),
+    z.literal("true").refine(() => false, {
+      message:
+        "TRUST_PROXY=true is unsafe in production; use a specific hop count or 'loopback'",
+    }),
+    z
+      .string()
+      .regex(/^\d+$/, {
+        message:
+          "TRUST_PROXY must be 'false', a positive integer hop count, or 'loopback'",
+      })
+      .transform((v) => parseInt(v, 10)),
+    z.literal("loopback"),
+  ]),
+);
+
 const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
@@ -20,7 +39,11 @@ const envSchema = z.object({
     .default("info"),
   CORS_ORIGINS: z.string().min(1).default("http://localhost:3000"),
   BODY_SIZE_LIMIT: z.string().min(1).default("1mb"),
-  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000),
+  RATE_LIMIT_WINDOW_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(15 * 60 * 1000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(100),
   TRUST_PROXY: z
     .string()

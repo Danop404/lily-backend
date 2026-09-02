@@ -31,8 +31,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Dependency vulnerability scan
+        run: npm run audit:prod
+
       - name: Build
         run: npm run build
 
-      - name: Test
-        run: npm run test
+      - name: Test & Coverage
+        run: npm run test:coverage

@@ -1,39 +1,28 @@
 import { z } from "zod";
 
-import { isValidStellarAddress } from "./stellar-address";
+/**
+ * Normalizes a decimal amount string by stripping leading zeros
+ * while preserving the canonical decimal form.
+ * "007.00" -> "7.00", "0.50" -> "0.50", "100.00" -> "100.00"
+ */
+export const normalizeAmount = (val: string): string => {
+  const trimmed = val.trim();
+  if (!trimmed) return trimmed;
 
-const MAX_INTEGER_DIGITS = 24;
-const MAX_FRACTIONAL_DIGITS = 7;
+  const parts = trimmed.split(".");
+  // Strip leading zeros from integer part, but keep at least one digit
+  const intPart = parts[0].replace(/^0+/, "") || "0";
+  const decPart = parts.length > 1 ? "." + parts.slice(1).join(".") : "";
+  return intPart + decPart;
+};
 
-export const assetCodeSchema = z
-  .string()
-  .min(1, "assetCode is required")
-  .max(12, "assetCode must be at most 12 characters")
-  .regex(/^[A-Za-z0-9]+$/, "assetCode must contain only letters and numbers");
-
-export const amountSchema = z
-  .string()
-  .regex(
-    new RegExp(
-      `^\\d{1,${MAX_INTEGER_DIGITS}}(\\.\\d{1,${MAX_FRACTIONAL_DIGITS}})?$`,
-    ),
-    `Amount must have at most ${MAX_INTEGER_DIGITS} integer digits and ${MAX_FRACTIONAL_DIGITS} fractional digits`,
-  )
-  .refine((value) => /[1-9]/.test(value.replace(".", "")), {
-    message: "Amount must be greater than zero",
-  });
-
-export const stellarAddressSchema = z
-  .string()
-  .refine(isValidStellarAddress, "toAddress must be a valid Stellar G-address");
-
-export const quoteRequestSchema = z.object({
-  fromWalletId: z.string().min(1, "fromWalletId is required"),
-  toAddress: stellarAddressSchema,
-  amount: amountSchema,
-  assetCode: assetCodeSchema.describe(
-    "Stellar asset code; use XLM for the native Stellar asset.",
-  ),
+export const quoteSchema = z.object({
+  amount: z
+    .string()
+    .min(1)
+    .transform(normalizeAmount),
+  currency: z.string().min(3).max(3).default("USD"),
 });
 
-export type QuoteRequestSchema = z.infer<typeof quoteRequestSchema>;
+export type QuoteInput = z.input<typeof quoteSchema>;
+export type QuoteOutput = z.output<typeof quoteSchema>;

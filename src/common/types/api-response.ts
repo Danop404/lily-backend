@@ -10,6 +10,7 @@ export interface ApiMessageResponse {
 
 export interface ApiErrorResponse {
   success: false;
+  code?: string;
   message: string;
   details?: unknown;
 }

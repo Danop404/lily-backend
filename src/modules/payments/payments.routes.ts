@@ -1,9 +1,11 @@
 import { Router } from "express";
 
 import { validateBody } from "../../common/http/validate.middleware";
-import { getQuote } from "./payments.controller";
-import { quoteRequestSchema } from "./payments.schema";
+import { createQuote, executePayment, getQuote } from "./payments.controller";
+import { createQuoteSchema, executePaymentSchema } from "./payments.schema";
 
 export const paymentsRouter = Router();
 
-paymentsRouter.post("/quote", validateBody(quoteRequestSchema), getQuote);
+paymentsRouter.post("/", validateBody(createQuoteSchema), createQuote);
+paymentsRouter.get("/quotes/:id", getQuote);
+paymentsRouter.post("/execute", validateBody(executePaymentSchema), executePayment);

@@ -44,6 +44,7 @@ app.use(
   }),
 );
 import { apiRateLimiter } from "./config/rate-limit";
+import { shouldIgnoreRequestLog } from "./config/request-logging";
 import { apiRouter } from "./routes";
 
 export const createApp = (): Express => {

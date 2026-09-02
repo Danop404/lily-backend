@@ -22,6 +22,10 @@ export default tseslint.config(
         "error",
         { prefer: "type-imports" },
       ],
+      "@typescript-eslint/no-floating-promises": [
+        "error",
+        { ignoreVoid: true },
+      ],
     },
   },
 );

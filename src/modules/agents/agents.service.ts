@@ -1,55 +1,75 @@
+import { AppError } from "../../common/http/app-error";
 import type {
   Agent,
+  AgentStatus,
   CreateAgentInput,
   CreateAgentResponse,
   ListAgentsResponse,
+  UpdateAgentStatusResponse,
 } from "./agents.types";
 
-const seedAgents = (): Agent[] => [
+const MAX_IN_MEMORY_AGENTS = 5_000;
+
+const initialAgents: Agent[] = [
   {
     id: "agentlily_demo_001",
     name: "Treasury Settlement Agent",
     description:
-      "Demonstration AgentLily responsible for mock treasury settlement workflows.",
-    walletAddress: "GBLILYDEMOSETTLEMENTWALLET000000000000000000001",
+      "AgentLily instance responsible for orchestrating treasury rebalancing operations.",
+    walletAddress: "GBVDO6P6E3S6XG2Z5V5L7N3Z6Y2K4J5H7F8D9S0A1B2C3D4E5F6G7H8I",
     status: "active",
-    capabilities: ["wallet-provisioning", "usdc-payments", "settlement"],
-    createdAt: new Date("2026-05-16T00:00:00.000Z").toISOString(),
+    capabilities: ["settlement", "rebalance", "liquidity-monitoring"],
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
   },
 ];
 
-const agentsStore: Agent[] = seedAgents();
-
-const createWalletAddress = (seed: string): string => {
-  const normalizedSeed = seed.replace(/[^a-z0-9]/gi, "").toUpperCase();
-  return `G${normalizedSeed.padEnd(55, "0").slice(0, 55)}`;
-};
+let agents: Agent[] = [...initialAgents];
+let agentSequence = initialAgents.length + 1;
 
 export const agentsService = {
-  listAgents(): ListAgentsResponse {
-    return {
-      agents: agentsStore,
-      total: agentsStore.length,
-    };
+  listAgents: () => ({
+    total: agents.length,
+    agents: [...agents],
+  }),
+
+  getAgentById: (id: string): Agent | undefined => {
+    return agents.find((agent) => agent.id === id);
   },
 
-  createAgent(input: CreateAgentInput): CreateAgentResponse {
+  createAgent: (input: CreateAgentInput): Agent => {
+    const now = new Date().toISOString();
+    const slug = input.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    const walletAddress = `G${slug.padEnd(55, "0").slice(0, 55)}`;
+
     const agent: Agent = {
-      id: `agentlily_${agentsStore.length + 1}`,
+      id: `agentlily_${agentSequence++}`,
       name: input.name,
       description: input.description,
-      walletAddress: createWalletAddress(input.name),
+      walletAddress,
       status: "active",
       capabilities: input.capabilities,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
 
-    agentsStore.push(agent);
+    if (agents.length >= MAX_IN_MEMORY_AGENTS) {
+      agents.shift();
+    }
 
-    return { agent };
+    agents.push(agent);
+    return agent;
   },
 
-  reset(): void {
-    agentsStore.splice(0, agentsStore.length, ...seedAgents());
+  updateAgentStatus(id: string, status: Agent["status"]): UpdateAgentStatusResponse {
+    const agent = agentsStore.find((a) => a.id === id);
+
+    if (!agent) {
+      throw new AppError(404, "Agent not found");
+    }
+
+    agent.status = status;
+
+    return { agent };
   },
 };
